@@ -1,49 +1,32 @@
-import { useState, useCallback, useRef } from "react"
-import questions from "../data/questions"
-import quixCompleteImg from "../assets/quiz-complete.png";
+import { useState, useCallback } from "react"
+import QUESTIONS from "../data/questions"
 import Question from "./Question";
+import Summary from "./Summary";
 export default function Quiz() {
-    const [userAnswers, setUserAnswers] = useState([]);
-    const [answersState, setAnswerState] = useState([])
-    
+    const [userAnswers, setUserAnswers] = useState([]);    
     
     
     const activeQuestionIndex = userAnswers.length;
     
-    const quizIsCompleted = activeQuestionIndex === questions.length;
+    const quizIsCompleted = activeQuestionIndex === QUESTIONS.length;
     
-    const handleAnserClick = useCallback(function handleAnswerClick(selectedAnswer) {
-        setAnswerState('answered');
+    const handleAnswerClick = useCallback(function handleAnswerClick(selectedAnswer) {
         setUserAnswers( (prevUserAnswers) => {
-            return [...prevUserAnswers, selectedAnswer]
+            const isCorrect = selectedAnswer === QUESTIONS[activeQuestionIndex].answers[0];
+            return [...prevUserAnswers, { answer: selectedAnswer, isCorrect }]
         });
-
-        setTimeout(() => {
-            if (selectedAnswer === questions[activeQuestionIndex].answers[0]){
-                setAnswerState('correct')
-            }else{
-                setAnswerState('wrong')
-            }
-        }, 1000)
-
-        setTimeout(() =>{
-            setAnswerState('')
-        }, 2000)
         
     }, [activeQuestionIndex]);
 
     const handleSkipAnswer = useCallback(() => {
-        handleAnserClick(null);
-    }, [handleAnserClick]);
+        handleAnswerClick(null);
+    }, [handleAnswerClick]);
 
     
 
     if (quizIsCompleted) {
         return (
-            <div id="summary">
-                <img src={quixCompleteImg} alt="Quiz Complete" />
-                <h2>Quiz Completed</h2>
-            </div>
+            <Summary userAnswers={userAnswers}  />
         )
     }
 
@@ -53,12 +36,8 @@ export default function Quiz() {
     return (    
         <div id="quiz">
             <Question
-                key={activeQuestionIndex} 
-                questionText={questions[activeQuestionIndex].text} 
-                answers={questions[activeQuestionIndex].answers} 
-                onSelectAnswer={handleAnserClick} 
-                selectedAnswer={userAnswers[userAnswers.length-1]}
-                answersState={answersState}
+                questionIndex={activeQuestionIndex} 
+                onSelectAnswer={handleAnswerClick}
                 onSkipAnswer={handleSkipAnswer}
                 />
         </div>
